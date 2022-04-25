@@ -13,12 +13,14 @@
 Вывести таблицу на экран. Осуществить поиск введенной буквы в хеш-таблице.
 */
 
+//Узел очереди
 typedef struct Node
 {
     char value;
     struct Node *next; //На случай колизии
 } Node;
 
+//Очередь
 typedef struct Queue
 {
     Node *head;
@@ -27,18 +29,19 @@ typedef struct Queue
     size_t size;
 } Queue;
 
+//Таблица очередей
 typedef struct Table
 {
     Queue **table;
     size_t size;
 } Table;
 
+//Структура символов и количества вхождений их в строке
 typedef struct CharsQuanity
 {
     char str[100];
     int quanity[100];
 } CharsQuanity;
-
 
 //Выводит элементы очереди
 void QueuePrint(Queue *q)
@@ -53,7 +56,6 @@ void QueuePrint(Queue *q)
     printf("\n");
 }
 
-
 //Ищет узел со значением
 Node *QueueSearch(Queue *q, char data)
 {
@@ -67,7 +69,7 @@ Node *QueueSearch(Queue *q, char data)
     return NULL;
 }
 
-//Ищет узел со значением и возвращает номер
+//Ищет узел со значением и изменяет номер
 Node *QueueSearchNumber(Queue *q, char data, int *n)
 {
     Node *current = q->head;
@@ -148,7 +150,7 @@ int ArrayMax(int *arr)
     return max;
 }
 
-CharsQuanity* CharsQuanityCreate()
+CharsQuanity *CharsQuanityCreate()
 {
     CharsQuanity *ch = malloc(sizeof(CharsQuanity));
     int size = 100;
@@ -161,20 +163,20 @@ CharsQuanity* CharsQuanityCreate()
 }
 
 //Заполнение структуры символов и количества символов
-void CharsQuanityFill(CharsQuanity *cq, char *str)
+void CharsQuanityFill(CharsQuanity *qua, char *str)
 {
     int j = 0;
     for (char *c = str; *c != '\0'; c++)
-	{
-        int i = CharSearch(*c, cq->str);
+    {
+        int i = CharSearch(*c, qua->str);
         if (i == -1)
         {
-            cq->str[j] = *c;
-            cq->quanity[j] = 1;
+            qua->str[j] = *c;
+            qua->quanity[j] = 1;
             j++;
         }
         else
-            cq->quanity[i] = cq->quanity[i] + 1;
+            qua->quanity[i] = qua->quanity[i] + 1;
     }
     return;
 }
@@ -199,9 +201,9 @@ Table *HashTableCreate(int size)
     return t;
 }
 
-//Создание хеша по количество 
+//Создание хеша по количество
 int HashGenerate(char data, CharsQuanity *qua)
-{   
+{
     int i = CharSearch(data, qua->str);
     if (i != -1)
         return qua->quanity[i];
@@ -241,12 +243,11 @@ void HashTableFill(Table *t, CharsQuanity *qua)
         }
     for (int i = 0; i < count; i++)
     {
-        //printf("To hash %d Adding %c\n", qua->quanity[i], qua->str[i]);
-        //HashTableAdd(t, qua->str[i], qua);
+        // printf("To hash %d Adding %c\n", qua->quanity[i], qua->str[i]);
+        // HashTableAdd(t, qua->str[i], qua);
         QueuePushBack(t->table[qua->quanity[i]], qua->str[i]);
     }
 }
-
 
 //Поиск элемента в хеш-таблице
 void HashTableSearch(Table *t, char data, CharsQuanity *qua)
@@ -288,56 +289,33 @@ void HashTableFree(Table *t)
 //Ввод строки
 char *StringGet(int *len)
 {
-   *len = 0;                               // изначально строка пуста
-   int capacity = 8;                       // ёмкость контейнера динамической строки (1, так как точно будет '\0')
-   char *s = (char *)malloc(capacity * sizeof(char)); // динамическая пустая строка
+    *len = 0;                                          // изначально строка пуста
+    int capacity = 8;                                  // ёмкость контейнера динамической строки (1, так как точно будет '\0')
+    char *s = (char *)malloc(capacity * sizeof(char)); // динамическая пустая строка
 
-   char c = getchar(); // символ для чтения данных
+    char c = getchar(); // символ для чтения данных
 
-   // читаем символы, пока не получим символ переноса строки (\n)
-   while (c != '\n')
-   {
-      s[(*len)++] = c; // заносим в строку новый символ
-
-      // если реальный размер больше размера контейнера, то увеличим его размер
-      if (*len >= capacity)
-      {
-         capacity = capacity * 2;                                      // увеличиваем ёмкость строки на 1
-         s = (char *)realloc(s, capacity * sizeof(char)); // создаём новую строку с увеличенной ёмкостью
-      }
-      c = getchar(); // считываем следующий символ
-   }
-
-   s[*len] = '\0'; // завершаем строку символом конца строки
-
-   return s; // возвращаем указатель на считанную строку
-}
-
-//Ввод цифры
-int IntGet()
-{
-    char *string;
-    int len;
-    string = StringGet(&len);
-
-    int number = 0;
-    for (size_t i = 0; i < len; i++)
+    // читаем символы, пока не получим символ переноса строки (\n)
+    while (c != '\n')
     {
-        if ((string[i] <= '9') && (string[i] >= '0'))
+        s[(*len)++] = c; // заносим в строку новый символ
+
+        // если реальный размер больше размера контейнера, то увеличим его размер
+        if (*len >= capacity)
         {
-            number *= 10;
-            number += string[i] - '0';
+            capacity = capacity * 2;                         // увеличиваем ёмкость строки на 1
+            s = (char *)realloc(s, capacity * sizeof(char)); // создаём новую строку с увеличенной ёмкостью
         }
-        else
-            break;
+        c = getchar(); // считываем следующий символ
     }
-    free(string);
-    return number;
+
+    s[*len] = '\0'; // завершаем строку символом конца строки
+
+    return s; // возвращаем указатель на считанную строку
 }
 
 int main()
 {
-    
 
     // char *text = "qwertyuiosdrfgdysuhfhvnituecormitneorvitwbcrhnuotewmcuionew";
     //Ввод текста
@@ -347,54 +325,27 @@ int main()
     CharsQuanity *cq;
     cq = CharsQuanityCreate();
 
+    //Заполнение структуры вхождений символов в строке
     printf("Write some string to Hash table\n>>");
     text = StringGet(&text_len);
-
-    
     printf("You wrote: %s\n", text);
-
     printf("CharsQuanity filling...\n");
     CharsQuanityFill(cq, text);
     printf("Completed.\n");
 
+    //Создание таблицы
     int table_size = ArrayMax(cq->quanity) + 1;
     printf("Creating table size %d...\n", table_size);
-
-    
     Table *t = HashTableCreate(table_size);
     printf("Completed.\n");
 
+    //Заполнение таблицы
     printf("Hash table filling...\n");
     HashTableFill(t, cq);
     printf("Completed.\n");
 
     HashTablePrint(t);
-    
-    /*
-    for (size_t i = 0; i < 100; i++)
-    {
-        printf("%2d|%2d|%c\n", i, cq->quanity[i], cq->str[i]);
-    }
-    */
-    
-    
-    /*
 
-    //Создание хеш-таблицы
-    int table_size;
-    printf("Enter size of hash table:\n>>");
-    table_size = IntGet();
-    printf("Creating table size %d\n", table_size);
-    Table *t = HashTableCreate(table_size);
-    printf("Hash table created.\n");
-
-    //Перевод символов в хеш-таблицу
-    printf("Chars to hash table...\n");
-    for (char *c = text; *c != '\0'; c++)
-        HashTableAdd(t, *c);
-    printf("Completed.\n");
-    */
-    
     //Поиск символов
     printf("Write string to search chars from\n>>");
     int text_search_len;
@@ -407,10 +358,12 @@ int main()
     }
     printf("Completed.\n");
 
-    
-
+    //Освобождение памяти
     free(text);
-//    free(text_search);
+    free(text_search);
+    printf("Char Quanity free...\n");
+    free(cq);
+    printf("Completed.\n");
     HashTableFree(t);
 
     return 0;
